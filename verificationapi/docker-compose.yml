@@ -1,0 +1,93 @@
+version: "2.3"
+
+services:
+  mls-analysis-service:
+    build: .
+    command: pserve development.ini --reload
+    image: mls_analysis_service
+    ports:
+      - "6543:6543"
+    volumes:
+      - ./app:/app
+    environment:
+      - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
+      # - CELERY_BACKEND=redis://redis:6379/0
+      - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
+    depends_on:
+      # - redis
+      - mongo
+      - rabbitmq
+
+  celery:
+    build: .
+    # command: celery -A pyramid_celery.celery_app worker --ini development.ini
+    # command: celery -A celery_worker worker --pool=solo --loglevel=INFO
+    # command: celery -A celery_worker worker --concurrency=1 --loglevel=INFO
+    command: watchmedo auto-restart -- celery worker -A celery_worker --concurrency=1 --loglevel=INFO
+    image: mls_analysis_service
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #       - driver: nvidia
+    #         count: all
+    #         capabilities: [gpu, utility, compute]
+    volumes:
+      - ./app:/app
+    environment:
+      # - PYTORCH_NO_CUDA_MEMORY_CACHING=1
+      # - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
+      - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
+      # - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - mls-analysis-service
+      # - redis
+      - mongo
+      - rabbitmq
+
+  queue-dashboard:
+    build: .
+    image: mls_analysis_service
+    command: flower -A celery_worker --port=5555 --broker=amqp://admin:mypass@rabbitmq//
+    ports:
+      - 5555:5555
+    volumes:
+      - ./app:/app
+    environment:
+      - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
+      # - CELERY_BACKEND=redis://redis:6379/0
+      - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
+    depends_on:
+      # - web
+      # - redis
+      - rabbitmq
+      - mongo
+      - celery
+
+  rabbitmq:
+    image: rabbitmq:latest
+    environment:
+    - RABBITMQ_DEFAULT_USER=admin
+    - RABBITMQ_DEFAULT_PASS=mypass
+
+  # redis:
+  #   image: redis:5-alpine
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8082:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+    depends_on:
+      - mongo

@@ -1,0 +1,10 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<form action="/full_analyze" method="POST">
+  <textarea id="article" name="article">
+  </textarea>
+  <input type="text" id="keyword" name="keyword" />
+  <input type="submit" value="Submit">
+</form> 
+{% endblock content %}

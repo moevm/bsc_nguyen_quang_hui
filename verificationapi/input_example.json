@@ -1,0 +1,85 @@
+[]
+]
+
+{
+    "article": [
+        [   // параграф 1
+            "Предложение 1.",
+            "Предложение 2.",
+            "Предложение 3.",
+            "Предложение 4."
+        ],
+        [   // параграф 2
+            "Предложение 1.",
+            "Предложение 2.",
+            "Предложение 3.",
+            "Предложение 4."
+        ]
+    ],
+    "keywords": [
+        "ключевое слово 1",
+        "ключевое слово 2",
+        "ключевое слово 3"
+    ]
+}
+
+[service_address]:[service_port]/full_analyze
+
+"3e180be0-773c-448d-b357-b908524952a0"
+
+"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+localhost: 6543/check/3e180be0-773c-448d-b357-b908524952a0
+
+[service_address]:[service_port]/check/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+{
+    "status": "PENDING"
+}
+
+{
+    "status": "SUCCESS",
+    "processing_time": 7.823,
+    "coherence": [
+        { // параграф 1
+            "has_missing": 0,
+            "missing_sentences": [0, 0, 0],
+            "has_incoherent": 0,
+            "incoherent_sentences": [0, 0, 0, 0]
+        },
+        { // параграф 2
+            "has_missing": 1,
+            "missing_sentences": [1, 0, 0],
+            "has_incoherent": 1,
+            "incoherent_sentences": [1, 0, 0, 0]
+        }
+    ],
+    "user_phrases": [
+        {
+            "text": "ключевое слово 1",
+            "score": 0.9995948672294617
+        },
+        {
+            "text": "ключевое слово 2",
+            "score": 0.5014840960502625
+        },
+        {
+            "text": "ключевое слово 3",
+            "score": 0.9995989203453064
+        }
+    ],
+    "keyword_candidates": [
+        {
+            "text": "кандидат ключевого слова 1",
+            "score": 0.9824236631393433
+        },
+        {
+            "text": "кандидат ключевого слова 2",
+            "score": 0.972765326499939
+        },
+        {
+            "text": "кандидат ключевого слова 3",
+            "score": 0.9551995992660522
+        }
+    ]
+}
