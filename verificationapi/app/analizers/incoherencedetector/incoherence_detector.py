@@ -22,6 +22,7 @@ class IncoherenceDetector(AbstractAnalizer):
         super().__init__(language, nlp_module)
 
         self.use_cuda = torch.cuda.is_available()
+        print("Keyword extractor using GPU: "+str(self.use_cuda))
         self.device = torch.device("cuda" if self.use_cuda else "cpu")
         # self.device = torch.device('cpu')
 
@@ -41,9 +42,9 @@ class IncoherenceDetector(AbstractAnalizer):
             state_dict=checkpoint['model_state_dict']
         )
 
-        # quantize the encoder model (BERT) to int8 on cpu / and float16 on gpu (not sure if that work, TODO: check this)
-        # if not self.use_cuda:
-        #     self.model.bert_layer = torch.quantization.quantize_dynamic(self.model.bert_layer,{torch.nn.Linear},dtype=torch.qint8)
+        # quantize the encoder model (BERT) to int8 on cpu
+        if not self.use_cuda:
+            self.model.bert_layer = torch.quantization.quantize_dynamic(self.model.bert_layer,{torch.nn.Linear},dtype=torch.qint8, inplace=True)
 
         self.model.to(self.device)
 
@@ -224,8 +225,8 @@ class IncoherenceDetector(AbstractAnalizer):
             1 if i in unrelated_sentences else 0 for i in range(len(masked_arr))]
 
         cluster_marking = [0 for i in range(len(masked_arr))]
-        for cls_i, cls in enumerate(clusters):
-            for i in cls:
+        for cls_i, clst in enumerate(clusters):
+            for i in clst:
                 cluster_marking[i] = cls_i
 
         missing_sentences = [1 if cluster_marking[i] != cluster_marking[i+1] and (len(clusters[cluster_marking[i]]) > 1 or len(

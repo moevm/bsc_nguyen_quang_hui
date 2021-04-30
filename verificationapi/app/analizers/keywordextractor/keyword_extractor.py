@@ -22,6 +22,7 @@ class KeywordExtractor(AbstractAnalizer):
         super().__init__(language, nlp_module)
 
         self.use_cuda = torch.cuda.is_available()
+        print("Keyword extractor using GPU: "+str(self.use_cuda))
         self.device = torch.device("cuda" if self.use_cuda else "cpu")
         # self.device = torch.device('cpu')
 
@@ -31,9 +32,9 @@ class KeywordExtractor(AbstractAnalizer):
         else:
             self.sent_transformer_model = encoder
         
-        # quantize the encoder model (SBERT) to int8 on cpu and float16 on gpu
-        # if not self.use_cuda:
-        #     self.sent_transformer_model = torch.quantization.quantize_dynamic(self.sent_transformer_model,{torch.nn.Linear},dtype=torch.qint8)
+        # quantize the encoder model (SBERT) to int8 on cpu
+        if not self.use_cuda:
+            self.sent_transformer_model = torch.quantization.quantize_dynamic(self.sent_transformer_model,{torch.nn.Linear},dtype=torch.qint8, inplace=True)
 
         print("SBERT model loaded")
 

@@ -6,9 +6,8 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN apt-get update
-RUN apt-get install -y python3.6 python3-pip
-RUN python3 -m pip install --upgrade pip
+RUN apt-get update && apt-get install -y python3.8 python3-pip
+RUN python3 -m pip install pip==21.0.1
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONIOENCODING utf-8
@@ -21,18 +20,17 @@ RUN pip3 install -r requirements.txt
 COPY download_pretrained_model.py /download_pretrained_model.py
 RUN python3 download_pretrained_model.py
 
-RUN pip3 install stanza-batch
+# flower does not work with celery 5.0.5 at the moment -> upgrade later
+# RUN pip3 install celery==5.0.5
 
-RUN pip3 install watchdog==0.8.3
-RUN pip3 install PyYAML==3.12
-RUN pip3 install argh==0.26.2
-
+# RUN pip3 install https://github.com/mher/flower/zipball/master#egg=flower
 COPY app /app
 
 ENV PYTHONPATH=/app
 WORKDIR /app
 
-# RUN cd /usr/local/lib/python3.6/dist-packages && \
+# RUN python3 --version
+# RUN cd /usr/local/lib/python3.8/dist-packages && \
 #     python3 /app/setup.py develop
 RUN pip3 install -e .
 

@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 
-from celery_worker import app as celery_app, full_analyze_task
+from celery_worker import app as celery_app, full_analyze_task #, init_worker_task
 
 from celery.result import AsyncResult
 
@@ -13,19 +13,28 @@ def my_view(request):
 
 @view_config(route_name='full_analyze', renderer='json', request_method='POST')
 def full_analyze(request):
+    # TODO: error handling when article_text or keywords is missing
     if(request.POST):
         article_text = request.POST['article']
         keywords = [s.strip() for s in request.POST['keyword'].split(',')]
+        callback_url = request.POST['callbackUrl'] if 'callbackUrl' in request.POST else None
         print(keywords)
-        task = full_analyze_task.delay(article_text, 'ru', user_phrases=keywords)
-        return task.id
+        # if callback_url is None:
+        #     task = full_analyze_task.delay(input=article_text, language='ru', user_phrases=keywords)
+        # else:
+        task = full_analyze_task.apply_async(kwargs={'input':article_text, 'language':'ru', 'user_phrases':keywords, 'callback_url':callback_url}, ignore_result=(callback_url is None)) 
+        return task.id if task is not None else None
     elif(request.json_body):
         print(request.json)
         article_text = request.json_body['article']
         keywords = request.json_body['keywords']
+        callback_url = request.json_body['callbackUrl'] if 'callbackUrl' in request.json_body else None
         print(keywords)
-        task = full_analyze_task.delay(article_text, 'ru', user_phrases=keywords)
-        return task.id
+        # if callback_url is None:
+        #     task = full_analyze_task.delay(input=article_text, language='ru', user_phrases=keywords)
+        # else:
+        task = full_analyze_task.apply_async(kwargs={'input':article_text, 'language':'ru', 'user_phrases':keywords, 'callback_url':callback_url}, ignore_result=(callback_url is None)) 
+        return task.id if task is not None else None
 
     return None
 
@@ -60,6 +69,9 @@ def forget_result(request):
 #     # counter = service.example_function("string")
 #     return {'project': 'mls_analysis_service'+counter}
 
+@view_config(route_name='init_worker', renderer='json', request_method='POST')
+def init_worker(request):
+    task = full_analyze_task.delay()
 
 @view_config(route_name='json', renderer='json', request_method='POST')
 def json_post(request):

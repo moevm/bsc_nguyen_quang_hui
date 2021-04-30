@@ -5,4 +5,5 @@ def includeme(config):
     config.add_route('json', '/json')
     config.add_route('check', '/check/{task_id}')
     config.add_route('forget', '/forget/{task_id}')
+    config.add_route('init_worker', '/init_worker')
         

@@ -7,8 +7,6 @@ class NextSentenceClassifier(nn.Module):
     def __init__(self, bert_model_name='bert-base-uncased', state_dict=None):
         super(NextSentenceClassifier, self).__init__()
 
-        self.device = torch.device(
-            'cuda') if torch.cuda.is_available() else torch.device('cpu')
         # Instantiating BERT model object
         config = AutoConfig.from_pretrained(
             bert_model_name, output_hidden_states=True)
@@ -36,12 +34,15 @@ class NextSentenceClassifier(nn.Module):
             -attn_masks : Tensor of shape [B, T] containing attention masks to be used to avoid contibution of PAD tokens
         '''
 
+        device = torch.device(
+            'cuda') if torch.cuda.is_available() else torch.device('cpu')
+
         if input_ids is None:
-            input_ids = torch.zeros(1, 64).long().to(self.device)
+            input_ids = torch.zeros(1, 64).long().to(device)
         if attention_mask is None:
-            attention_mask = torch.zeros(1, 64).long().to(self.device)
+            attention_mask = torch.zeros(1, 64).long().to(device)
         if token_type_ids is None:
-            token_type_ids = torch.zeros(1, 64).long().to(self.device)
+            token_type_ids = torch.zeros(1, 64).long().to(device)
 
         # Feeding the input to BERT model to obtain contextualized representations
         res = self.bert_layer(input_ids, attention_mask=attention_mask,

@@ -12,19 +12,17 @@ services:
       - /app/mls_analysis_service.egg-info
     environment:
       - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
-      # - CELERY_BACKEND=redis://redis:6379/0
       - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
     depends_on:
-      # - redis
       - mongo
       - rabbitmq
+    networks:
+      - default
+      - external-nw
 
   celery:
     build: .
-    # command: celery -A pyramid_celery.celery_app worker --ini development.ini
-    # command: celery -A celery_worker worker --pool=solo --loglevel=INFO
     command: celery -A celery_worker worker --concurrency=1 --max-tasks-per-child=100 --loglevel=INFO
-    # command: watchmedo auto-restart -- celery worker -A celery_worker --concurrency=1 --loglevel=INFO
     image: mls_analysis_service
     # deploy:
     #   resources:
@@ -37,21 +35,19 @@ services:
       - ./app:/app
       - /app/mls_analysis_service.egg-info
     environment:
-      # - PYTORCH_NO_CUDA_MEMORY_CACHING=1
-      # - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
       - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
-      # - CELERY_BACKEND=redis://redis:6379/0
     depends_on:
       - mls-analysis-service
-      # - redis
       - mongo
       - rabbitmq
-
+    networks:
+      - default
+      - external-nw
+  
   queue-dashboard:
     build: .
     image: mls_analysis_service
-    # image: mher/flower
     command: celery -A celery_worker flower --port=5555 --broker=amqp://admin:mypass@rabbitmq//
     ports:
       - 5555:5555
@@ -59,25 +55,22 @@ services:
       - ./app:/app
       - /app/mls_analysis_service.egg-info
     environment:
-      # - BROKER_URL=amqp://admin:mypass@rabbitmq//
       - CELERY_BROKER=amqp://admin:mypass@rabbitmq//
-      # - CELERY_BACKEND=redis://redis:6379/0
       - CELERY_BACKEND=mongodb://root:example@mongo:27017/?authSource=admin
     depends_on:
-      # - web
-      # - redis
       - rabbitmq
       - mongo
       - celery
-
+    networks:
+      - default
+  
   rabbitmq:
     image: rabbitmq:latest
     environment:
     - RABBITMQ_DEFAULT_USER=admin
     - RABBITMQ_DEFAULT_PASS=mypass
-
-  # redis:
-  #   image: redis:5-alpine
+    networks:
+      - default
 
   mongo:
     image: mongo
@@ -85,7 +78,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-
+    networks:
+      - default
+  
   mongo-express:
     image: mongo-express
     restart: always
@@ -96,3 +91,11 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
     depends_on:
       - mongo
+    networks:
+      - default
+
+networks:
+  default:
+  external-nw:
+    external:
+      name: sw-auto-mlss-network

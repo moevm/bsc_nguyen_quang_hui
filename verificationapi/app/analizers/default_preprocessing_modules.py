@@ -9,6 +9,6 @@ def create_default_encoder():
     # 'distiluse-base-multilingual-cased' , 'xlm-r-100langs-bert-base-nli-stsb-mean-tokens', 'distilbert-multilingual-nli-stsb-quora-ranking'
     return sent_transformer_model
 
-def create_default_nlp_module(language='en'):
+def create_default_nlp_module(language='en', use_gpu=True):
     return stanza.Pipeline(
-        lang=language, processors='tokenize,pos,lemma')  # ,depparse,ner
+        lang=language, processors='tokenize,pos,lemma',use_gpu=use_gpu)  # ,depparse,ner

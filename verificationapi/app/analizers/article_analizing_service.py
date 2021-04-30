@@ -7,13 +7,13 @@ import time
 class ArticleAnalizingService(object):
 
     def __init__(self):
-        encoder = create_default_encoder()
+        # encoder = create_default_encoder()
         language = 'ru'
         nlp_module = create_default_nlp_module(language=language)
         self.incoherence_detector = IncoherenceDetector(
             language=language, nlp_module=nlp_module)
         self.keyword_extractor = KeywordExtractor(
-            language=language, nlp_module=nlp_module, encoder=encoder)
+            language=language, nlp_module=nlp_module)
         print("service initiated")
         gc.collect()
 

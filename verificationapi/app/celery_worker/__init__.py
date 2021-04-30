@@ -3,7 +3,8 @@ import time
 from celery import Celery
 import celery
 from analizers import ArticleAnalizingService
-
+import requests
+        
 print("celery queue init function")
 # app = initCeleryApp()
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER', 'redis://localhost:6379'),
@@ -42,23 +43,27 @@ class AnalysisTask(app.Task):
         # return x+y
         pass
         
-@app.task(bind=True, base=AnalysisTask, ignore_result=False)
-def full_analyze_task(self, input, language, user_phrases=[], extractor_n = 10):
-    return self.service.full_analyze(input, language, user_phrases=user_phrases, extractor_n = extractor_n)
-    
-# @app.task(bind=True, base=AnalysisTask)
-# def custom(self,x,y):
-#     print(x+y)
-#     self.db
-#     self.db
-#     self.db
-#     self.db
-#     print('running custom')
+@app.task(bind=True, base=AnalysisTask)
+def full_analyze_task(self, input=None, language='en', user_phrases=[], extractor_n = 10, callback_url = None):
+    print("Input received: "+str(input is None) + "; callbackUrl: "+str(callback_url))
+    # if input is not available, just load the model then finish
+    if input is None:
+        self.service
+        return None
 
-# simple task
-# @app.task
-# def add(x, y):
-#     print("called")
-#     time.sleep(5)
-#     print("wait completed")
-#     return x + y
+    # if callback_url is available, process it then send callback
+    if callback_url is not None:
+        # process the article
+        result = self.service.full_analyze(input, language, user_phrases=user_phrases, extractor_n = extractor_n)
+        # send a post request for webhook response
+        requests.post(callback_url, json= result)
+        # pass
+        return None
+    else:
+        # if input is available, process it then save result
+        return self.service.full_analyze(input, language, user_phrases=user_phrases, extractor_n = extractor_n)
+    
+# NOTE: this create task from base task, effectively - another task, which load its own model
+# @app.task(bind=True, base=AnalysisTask, ignore_result=True)
+# def init_worker_task(self):
+#     self.service
