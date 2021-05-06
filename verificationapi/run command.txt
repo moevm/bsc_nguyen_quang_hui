@@ -1,7 +1,10 @@
+# launch sw-auto
 docker-compose -f docker-compose-mlss.yml build && docker-compose -f docker-compose-mlss.yml up
 
+# launch verification api
 docker-compose -f docker-compose-sw-auto.yml up
 
+# cadvisor for monitoring (not needed)
 VERSION=v0.36.0 # use the latest release version from https://github.com/google/cadvisor/releases
 sudo docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:ro --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --volume=/dev/disk/:/dev/disk:ro --publish=8080:8080 --detach=true --name=cadvisor --privileged --device=/dev/kmsg gcr.io/cadvisor/cadvisor:$VERSION
 
