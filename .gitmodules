@@ -1,0 +1,3 @@
+[submodule "sw-auto"]
+	path = sw-auto
+	url = https://github.com/OSLL/sw-auto.git
