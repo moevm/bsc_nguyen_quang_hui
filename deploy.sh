@@ -1,14 +1,14 @@
-## update git
-sudo add-apt-repository ppa:git-core/ppa -y
-sudo apt update
-sudo apt install git
+# update git
+# sudo add-apt-repository ppa:git-core/ppa -y
+# sudo apt update
+# sudo apt install git
 
-## install git large file storage
-sudo apt install git-lfs
-git lfs install
+# install git large file storage
+# sudo apt install git-lfs
+# git lfs install
 
 ## update repo with models
-git lfs pull
+# git lfs pull
 
 ## get submodule code
 git submodule init
