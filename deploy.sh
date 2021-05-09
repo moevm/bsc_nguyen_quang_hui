@@ -4,11 +4,11 @@
 # sudo apt install git
 
 # install git large file storage
-# sudo apt install git-lfs
-# git lfs install
+sudo apt install git-lfs
+git lfs install
 
 ## update repo with models
-# git lfs pull
+git lfs pull
 
 ## get submodule code
 git submodule init
