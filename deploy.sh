@@ -1,10 +1,12 @@
+#!/bin/sh
+
 # update git
 # sudo add-apt-repository ppa:git-core/ppa -y
 # sudo apt update
 # sudo apt install git
 
 # install git large file storage
-sudo apt install git-lfs
+sudo apt install git-lfs -y
 git lfs install
 
 ## update repo with models
